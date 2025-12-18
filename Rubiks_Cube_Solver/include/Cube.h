@@ -17,10 +17,8 @@ public:
     void moveL();
     void moveR();
 
-    // Optimized apply for Solver (0-17: U, D, L, R, F, B groupings)
     void applyMove(int moveIndex);
 
-    // Standard apply
     void applyMove(const Move& move);
 
     bool isSolved() const;

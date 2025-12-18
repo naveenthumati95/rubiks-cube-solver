@@ -17,7 +17,6 @@ class Face {
 public:
     Face(Color initialColor);
 
-    // Accessors
     Color getSticker(int index) const;
     void setSticker(int index, Color color);
 
