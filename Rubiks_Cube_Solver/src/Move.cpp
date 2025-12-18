@@ -46,6 +46,7 @@ std::string Move::toString() const {
         case MoveType::R: c = 'R'; break;
         case MoveType::F: c = 'F'; break;
         case MoveType::B: c = 'B'; break;
+        default:          c = '?'; break; 
     }
 
     if (turns == 1) return std::string(1, c);

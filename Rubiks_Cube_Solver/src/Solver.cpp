@@ -1,62 +1,49 @@
 #include "Solver.h"
 
-// Constructor
 Solver::Solver(Cube& cube) : cube(cube) {}
 
-// Public solve entry (IDDFS)
 bool Solver::solve(int maxDepth) {
     solution.clear();
 
-    for (int depth = 0; depth <= maxDepth; depth++) {
-        if (dfs(0, depth)) {
+    for (int d = 1; d <= maxDepth; d++) {
+        if (dfs(0, d, -1)) {
             return true;
         }
     }
     return false;
 }
 
-// DFS with depth limit
-bool Solver::dfs(int depth, int maxDepth) {
-    if (cube.isSolved()) {
-        return true;
-    }
-
-    if (depth == maxDepth) {
-        return false;
-    }
-
-    for (const auto& m : moveSet) {
-        applyMove(m);
-        solution.emplace_back(m);
-
-        if (dfs(depth + 1, maxDepth)) {
-            return true;
-        }
-
-        // backtrack
-        undoMove(m);
-        solution.pop_back();
-    }
-
-    return false;
-}
-
-// Apply move
-void Solver::applyMove(const std::string& m) {
-    cube.applyMove(Move(m));
-}
-
-// Undo move (inverse)
-void Solver::undoMove(const std::string& m) {
-    if (m.size() == 1)
-        cube.applyMove(Move(m + "'"));
-    else if (m[1] == '\'')
-        cube.applyMove(Move(std::string(1, m[0])));
-    else if (m[1] == '2')
-        cube.applyMove(Move(m)); // 180° is self-inverse
-}
-
-// Getter
 const std::vector<Move>& Solver::getSolution() const {
     return solution;
+}
+
+bool Solver::dfs(int depth, int maxDepth, int lastMoveIndex) {
+    if (cube.isSolved()) return true;
+    if (depth == maxDepth) return false;
+
+    // Try all 18 moves
+    for (int i = 0; i < 18; i++) {
+        
+        // === PRUNING ===
+        if (lastMoveIndex != -1) {
+            int currentFace = getFace(i);
+            int lastFace = getFace(lastMoveIndex);
+
+            if (currentFace == lastFace) continue;
+
+            if ((currentFace / 2) == (lastFace / 2)) {
+                if (currentFace < lastFace) continue;
+            }
+        }
+
+        cube.applyMove(i);
+        solution.push_back(Move(moveNames[i]));
+
+        if (dfs(depth + 1, maxDepth, i)) return true;
+
+        solution.pop_back();
+        cube.applyMove(inverseMoves[i]);
+    }
+
+    return false;
 }

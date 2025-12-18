@@ -1,6 +1,6 @@
 #include "Cube.h"
 
-// Face indices for readability
+// Indices for internal face array
 static constexpr int UP    = 0;
 static constexpr int DOWN  = 1;
 static constexpr int FRONT = 2;
@@ -19,66 +19,44 @@ Cube::Cube()
     }
 {}
 
-// Apply U move (Up face clockwise)
+// === Core Rotations ===
+
 void Cube::moveU() {
-    // 1. Rotate the Up face itself
     faces[UP].rotateClockwise();
 
-    // 2. Rotate adjacent top rows
     Color temp[3];
+    for (int i = 0; i < 3; i++) temp[i] = faces[FRONT].getSticker(i);
 
-    // Save Front top row
-    for (int i = 0; i < 3; i++)
-        temp[i] = faces[FRONT].getSticker(i);
-
-    // Front <- Left
-    for (int i = 0; i < 3; i++)
-        faces[FRONT].setSticker(i, faces[LEFT].getSticker(i));
-
-    // Left <- Back
-    for (int i = 0; i < 3; i++)
-        faces[LEFT].setSticker(i, faces[BACK].getSticker(i));
-
-    // Back <- Right
-    for (int i = 0; i < 3; i++)
-        faces[BACK].setSticker(i, faces[RIGHT].getSticker(i));
-
-    // Right <- saved Front
-    for (int i = 0; i < 3; i++)
-        faces[RIGHT].setSticker(i, temp[i]);
+    // Front <- Right
+    for (int i = 0; i < 3; i++) faces[FRONT].setSticker(i, faces[RIGHT].getSticker(i));
+    // Right <- Back
+    for (int i = 0; i < 3; i++) faces[RIGHT].setSticker(i, faces[BACK].getSticker(i));
+    // Back <- Left
+    for (int i = 0; i < 3; i++) faces[BACK].setSticker(i, faces[LEFT].getSticker(i));
+    // Left <- Saved Front
+    for (int i = 0; i < 3; i++) faces[LEFT].setSticker(i, temp[i]);
 }
 
 void Cube::moveD() {
     faces[DOWN].rotateClockwise();
 
     Color temp[3];
+    for (int i = 0; i < 3; i++) temp[i] = faces[FRONT].getSticker(6 + i);
 
-    // Save Front bottom row
-    for (int i = 0; i < 3; i++)
-        temp[i] = faces[FRONT].getSticker(6 + i);
-
-    // Front <- Right
-    for (int i = 0; i < 3; i++)
-        faces[FRONT].setSticker(6 + i, faces[RIGHT].getSticker(6 + i));
-
-    // Right <- Back
-    for (int i = 0; i < 3; i++)
-        faces[RIGHT].setSticker(6 + i, faces[BACK].getSticker(6 + i));
-
-    // Back <- Left
-    for (int i = 0; i < 3; i++)
-        faces[BACK].setSticker(6 + i, faces[LEFT].getSticker(6 + i));
-
-    // Left <- saved Front
-    for (int i = 0; i < 3; i++)
-        faces[LEFT].setSticker(6 + i, temp[i]);
+    // Front <- Left
+    for (int i = 0; i < 3; i++) faces[FRONT].setSticker(6 + i, faces[LEFT].getSticker(6 + i));
+    // Left <- Back
+    for (int i = 0; i < 3; i++) faces[LEFT].setSticker(6 + i, faces[BACK].getSticker(6 + i));
+    // Back <- Right
+    for (int i = 0; i < 3; i++) faces[BACK].setSticker(6 + i, faces[RIGHT].getSticker(6 + i));
+    // Right <- Saved Front
+    for (int i = 0; i < 3; i++) faces[RIGHT].setSticker(6 + i, temp[i]);
 }
 
 void Cube::moveF() {
     faces[FRONT].rotateClockwise();
 
     Color temp[3];
-
     temp[0] = faces[UP].getSticker(6);
     temp[1] = faces[UP].getSticker(7);
     temp[2] = faces[UP].getSticker(8);
@@ -104,7 +82,6 @@ void Cube::moveB() {
     faces[BACK].rotateClockwise();
 
     Color temp[3];
-
     temp[0] = faces[UP].getSticker(0);
     temp[1] = faces[UP].getSticker(1);
     temp[2] = faces[UP].getSticker(2);
@@ -130,7 +107,6 @@ void Cube::moveL() {
     faces[LEFT].rotateClockwise();
 
     Color temp[3];
-
     temp[0] = faces[UP].getSticker(0);
     temp[1] = faces[UP].getSticker(3);
     temp[2] = faces[UP].getSticker(6);
@@ -156,7 +132,6 @@ void Cube::moveR() {
     faces[RIGHT].rotateClockwise();
 
     Color temp[3];
-
     temp[0] = faces[UP].getSticker(2);
     temp[1] = faces[UP].getSticker(5);
     temp[2] = faces[UP].getSticker(8);
@@ -178,8 +153,45 @@ void Cube::moveR() {
     faces[BACK].setSticker(6, temp[0]);
 }
 
+// === Move Application ===
 
-// Check if cube is solved
+void Cube::applyMove(int moveIndex) {
+    // 0-2: U, 3-5: D, 6-8: L, 9-11: R, 12-14: F, 15-17: B
+    int face = moveIndex / 3;
+    int type = moveIndex % 3; // 0=Normal, 1=Prime, 2=Double
+
+    // 0 -> 1 turn (CW)
+    // 1 -> 3 turns (CW) = 1 CCW
+    // 2 -> 2 turns (CW) = 180
+    int turns = (type == 0) ? 1 : (type == 1 ? 3 : 2);
+
+    for (int k = 0; k < turns; k++) {
+        switch (face) {
+            case 0: moveU(); break;
+            case 1: moveD(); break;
+            case 2: moveL(); break;
+            case 3: moveR(); break;
+            case 4: moveF(); break;
+            case 5: moveB(); break;
+        }
+    }
+}
+
+void Cube::applyMove(const Move& move) {
+    for (int i = 0; i < move.getTurns(); i++) {
+        switch (move.getType()) {
+            case MoveType::U: moveU(); break;
+            case MoveType::D: moveD(); break;
+            case MoveType::L: moveL(); break;
+            case MoveType::R: moveR(); break;
+            case MoveType::F: moveF(); break;
+            case MoveType::B: moveB(); break;
+        }
+    }
+}
+
+// === Utilities ===
+
 bool Cube::isSolved() const {
     for (const Face& face : faces) {
         Color center = face.getSticker(4);
@@ -194,20 +206,3 @@ bool Cube::isSolved() const {
 const Face& Cube::getFace(int index) const {
     return faces[index];
 }
-
-void Cube::applyMove(const Move& move) {
-    for (int i = 0; i < move.getTurns(); i++) {
-        switch (move.getType()) {
-            case MoveType::U: moveU(); break;
-            case MoveType::D: moveD(); break;
-            case MoveType::L: moveL(); break;
-            case MoveType::R: moveR(); break;
-            case MoveType::F: moveF(); break;
-            case MoveType::B: moveB(); break;
-            default:
-                // Other moves coming later
-                break;
-        }
-    }
-}
-

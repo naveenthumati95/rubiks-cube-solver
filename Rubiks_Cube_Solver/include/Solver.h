@@ -4,23 +4,23 @@
 #include "Cube.h"
 #include "Move.h"
 #include <vector>
+#include <string>
 
 class Solver {
 public:
     explicit Solver(Cube& cube);
 
-    // Try to solve within maxDepth
+    // Uses IDDFS to find the shortest solution
     bool solve(int maxDepth);
 
-    // Get solution after solve()
     const std::vector<Move>& getSolution() const;
 
 private:
     Cube& cube;
     std::vector<Move> solution;
 
-    // All possible basic moves
-    const std::vector<std::string> moveSet = {
+    // Move names mapped to indices 0-17
+    const std::vector<std::string> moveNames = {
         "U", "U'", "U2",
         "D", "D'", "D2",
         "L", "L'", "L2",
@@ -29,12 +29,23 @@ private:
         "B", "B'", "B2"
     };
 
-    // Depth-limited DFS
-    bool dfs(int depth, int maxDepth);
+    // Fast inverse lookup for undoing moves
+    const int inverseMoves[18] = {
+        1, 0, 2,   // U
+        4, 3, 5,   // D
+        7, 6, 8,   // L
+        10, 9, 11, // R
+        13, 12, 14,// F
+        16, 15, 17 // B
+    };
 
-    // Apply + undo helpers
-    void applyMove(const std::string& m);
-    void undoMove(const std::string& m);
+    // Helper: Maps move index (0-17) to face index (0-5)
+    int getFace(int moveIndex) const {
+        return moveIndex / 3;
+    }
+
+    // Depth-limited DFS with pruning
+    bool dfs(int depth, int maxDepth, int lastMoveIndex);
 };
 
 #endif
