@@ -9,7 +9,7 @@ class Cube {
 public:
     Cube();
 
-    // Apply basic moves
+    // Basic face rotations
     void moveU();
     void moveD();
     void moveF();
@@ -17,12 +17,13 @@ public:
     void moveL();
     void moveR();
 
-    // Utility
-    bool isSolved() const;
+    // Optimized apply for Solver (0-17: U, D, L, R, F, B groupings)
+    void applyMove(int moveIndex);
 
+    // Standard apply
     void applyMove(const Move& move);
 
-    // Access (for testing & rendering)
+    bool isSolved() const;
     const Face& getFace(int index) const;
 
 private:
