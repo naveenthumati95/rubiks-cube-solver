@@ -31,21 +31,21 @@ void Cube::moveU() {
     for (int i = 0; i < 3; i++)
         temp[i] = faces[FRONT].getSticker(i);
 
-    // Front <- Left
+    // Front <- Right
     for (int i = 0; i < 3; i++)
-        faces[FRONT].setSticker(i, faces[LEFT].getSticker(i));
+        faces[FRONT].setSticker(i, faces[RIGHT].getSticker(i));
 
-    // Left <- Back
+    // Right <- Back
     for (int i = 0; i < 3; i++)
-        faces[LEFT].setSticker(i, faces[BACK].getSticker(i));
+        faces[RIGHT].setSticker(i, faces[BACK].getSticker(i));
 
-    // Back <- Right
+    // Back <- Left
     for (int i = 0; i < 3; i++)
-        faces[BACK].setSticker(i, faces[RIGHT].getSticker(i));
+        faces[BACK].setSticker(i, faces[LEFT].getSticker(i));
 
-    // Right <- saved Front
+    // Left <- saved Front
     for (int i = 0; i < 3; i++)
-        faces[RIGHT].setSticker(i, temp[i]);
+        faces[LEFT].setSticker(i, temp[i]);
 }
 
 void Cube::moveD() {
@@ -57,21 +57,21 @@ void Cube::moveD() {
     for (int i = 0; i < 3; i++)
         temp[i] = faces[FRONT].getSticker(6 + i);
 
-    // Front <- Right
+    // Front <- Left
     for (int i = 0; i < 3; i++)
-        faces[FRONT].setSticker(6 + i, faces[RIGHT].getSticker(6 + i));
+        faces[FRONT].setSticker(6 + i, faces[LEFT].getSticker(6 + i));
 
-    // Right <- Back
+    // Left <- Back
     for (int i = 0; i < 3; i++)
-        faces[RIGHT].setSticker(6 + i, faces[BACK].getSticker(6 + i));
+        faces[LEFT].setSticker(6 + i, faces[BACK].getSticker(6 + i));
 
-    // Back <- Left
+    // Back <- Right
     for (int i = 0; i < 3; i++)
-        faces[BACK].setSticker(6 + i, faces[LEFT].getSticker(6 + i));
+        faces[BACK].setSticker(6 + i, faces[RIGHT].getSticker(6 + i));
 
-    // Left <- saved Front
+    // Right <- saved Front
     for (int i = 0; i < 3; i++)
-        faces[LEFT].setSticker(6 + i, temp[i]);
+        faces[RIGHT].setSticker(6 + i, temp[i]);
 }
 
 void Cube::moveF() {
